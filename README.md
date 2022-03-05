@@ -14,4 +14,4 @@ The face detection subsystem was trained using YOLOv5 model to detect faces.
 The face identification subsystem utilizes the Convolutional Neural Network as well, but the CNN itself was built from ground up using the PyTorch framework. It was then trained to identify people.  
 
 ## LICENSE
-All code is licensed by MIT license.
+All code is licensed under the MIT license.
