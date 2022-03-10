@@ -1,3 +1,6 @@
+import smtplib
+from email.mime.text import MIMEText
+
 import time
 import cv2
 import numpy as np
@@ -44,7 +47,26 @@ class FaceAuth():
 
         cap.release()
 
+    def notify(self, 
+            email_from = None, 
+            email_to = None, 
+            email_subject = 'FaceAuth notification test.', 
+            email_msg = 'This is a test. Some dummy text. Ignore it.'
+        ):
+        assert email_from, 'ERROR: sender email unknown!'
+        assert email_to, 'ERROR: recipient unknown!'
 
+        msg = MIMEText('')
+        msg['Subject'] = email_subject
+        msg['From'] = email_from
+        msg['To'] = email_to
+
+        s = smtplib.SMTP('localhost')
+        s.sendmail(email_from, email_to, msg.as_string())
+        s.quit()
+    
+    def authorize(self):
+        pass
 
 
 
