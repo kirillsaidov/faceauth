@@ -1,10 +1,10 @@
-import smtplib
-from email.mime.text import MIMEText
-
 import time
 import cv2
 import numpy as np
 import yolov5model
+
+import smtplib
+from email.message import EmailMessage
 
 class FaceAuth():
     def __init__(self, face_model = None, person_model = None, face_model_img_size = (640, 640), person_model_img_size = (64, 64)):
@@ -49,21 +49,26 @@ class FaceAuth():
 
     def notify(self, 
             email_from = None, 
-            email_to = None, 
+            email_to = None,
+            email_password = None,
             email_subject = 'FaceAuth notification test.', 
-            email_msg = 'This is a test. Some dummy text. Ignore it.'
+            email_body = 'This is a test. Some dummy text. Ignore it.'
         ):
         assert email_from, 'ERROR: sender email unknown!'
         assert email_to, 'ERROR: recipient unknown!'
+        assert email_password, f'ERROR: password not provided for <{email_from}>!'
 
-        msg = MIMEText('')
-        msg['Subject'] = email_subject
-        msg['From'] = email_from
-        msg['To'] = email_to
+        # prepare email message
+        msg = EmailMessage()
+        msg['subject'] = email_subject  
+        msg['from'] = email_from
+        msg['to'] = email_to
+        msg.set_content(email_body)
 
-        s = smtplib.SMTP('localhost')
-        s.sendmail(email_from, email_to, msg.as_string())
-        s.quit()
+        # send message
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(email_from, email_password)
+            smtp.send_message(msg)
     
     def authorize(self):
         pass
