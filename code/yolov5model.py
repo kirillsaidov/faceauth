@@ -45,8 +45,8 @@ class YOLOv5Model:
     """
     def classToString(self, id):
         return self.classes[int(id)]
-    
-    
+
+
     """
     Returns a list of tuples (x1, y1, x2, y2, label)
     """
@@ -71,7 +71,7 @@ class YOLOv5Model:
     """
     Plots boudning boxes around detected objects
     """
-    def plotBoxes(self, modelOutput, frame, colorBGR = None, conf = 0.5, thickness = 3):
+    def plotBoxes(self, modelOutput, frame, colorBGR = None, conf = 0.5, thickness = 3, class_id = None):
         labels, coord = modelOutput
         x_size, y_size = frame.shape[1], frame.shape[0]
 
@@ -90,10 +90,28 @@ class YOLOv5Model:
                 else:
                     color = colorBGR[i]
 
-                # plot
+                # plot box
                 x1, y1, x2, y2 = int(j[0]*x_size), int(j[1]*y_size), int(j[2]*x_size), int(j[3]*y_size)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness)
-                cv2.putText(frame, self.classToString(labels[i]), (x1, y1 - thickness - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, thickness)
+
+                # draw text
+                class_id = self.classToString(labels[i]) if class_id is None else class_id
+                cv2.putText(frame, class_id, (x1, y1 - thickness - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, thickness)
+
+        return frame
+
+    def plotBox(self, coords, frame, colorBGR = None, class_id = None, conf = 0.5, thickness = 3):
+        x1, y1, x2, y2, _ = coords
+        if not class_id:
+            class_id = 'UNKNOWN'
+
+        if not colorBGR and class_id == 'UNKNOWN':
+            colorBGR = (0, 0, 255)
+        else:
+            colorBGR = (0, 255, 0)
+
+        cv2.rectangle(frame, (x1, y1), (x2, y2), colorBGR, thickness)
+        cv2.putText(frame, class_id, (x1, y1 - thickness - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, colorBGR, thickness)
 
         return frame
 

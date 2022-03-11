@@ -82,7 +82,7 @@ class CNNClassifier(nn.Module):
             self.transformer = transforms.Compose([
                 transforms.Resize((img_width, img_height)),
                 transforms.RandomHorizontalFlip(random_horizontal_flip),
-                transforms.RandomRotation(random_rotation),
+                # transforms.RandomRotation(random_rotation),
                 transforms.RandomPerspective(),
                 transforms.RandomGrayscale(p = 0.5),
                 transforms.ColorJitter(0.5, 0.5, 0.5, 0.5),
@@ -106,23 +106,37 @@ class CNNClassifier(nn.Module):
         self.layer_3 = self.__addLayerConv__(1)
         self.layer_4 = self.__addLayerMaxPool__()
 
-        self.layer_5 = self.__addLayerConv__(2)
-        self.layer_6 = self.__addLayerConv__(1)
+        self.layer_5 = self.__addLayerConv__(4)
+        self.layer_6 = self.__addLayerConv__(2)
         self.layer_7 = self.__addLayerMaxPool__()
 
-        self.layer_8 = self.__addLayerConv__(2)
-        self.layer_9 = self.__addLayerConv__(1)
+        self.layer_8 = self.__addLayerConv__(4)
+        self.layer_9 = self.__addLayerConv__(2)
         self.layer_10 = self.__addLayerMaxPool__()
-        """
+
         self.layer_11 = self.__addLayerConv__(2)
         self.layer_12 = self.__addLayerConv__(1)
         self.layer_13 = self.__addLayerConv__(1)
         self.layer_14 = self.__addLayerMaxPool__()
-        self.layer_15 = self.__addLayerConv__(2)
-        self.layer_16 = self.__addLayerConv__(1)
-        self.layer_17 = self.__addLayerConv__(1)
-        self.layer_18 = self.__addLayerMaxPool__()
-        """
+
+        # self.layer_13 = self.__addLayerConv__(2)
+        # self.layer_14 = self.__addLayerConv__(1)
+        # self.layer_15 = self.__addLayerConv__(1)
+        # self.layer_16 = self.__addLayerMaxPool__()
+        #
+        # self.layer_17 = self.__addLayerConv__(2)
+        # self.layer_18 = self.__addLayerConv__(1)
+        # self.layer_19 = self.__addLayerMaxPool__()
+        #
+        # self.layer_20 = self.__addLayerConv__(2)
+        # self.layer_21 = self.__addLayerConv__(1)
+        # self.layer_22 = self.__addLayerConv__(1)
+        #
+        # self.layer_23 = self.__addLayerConv__(2)
+        # self.layer_24 = self.__addLayerConv__(1)
+        # self.layer_25 = self.__addLayerConv__(1)
+        # self.layer_26 = self.__addLayerAveragePool__()
+
         self.layer_fc = self.__addLayerClassifier__()
 
     """
@@ -142,16 +156,28 @@ class CNNClassifier(nn.Module):
         out = self.layer_9(out)
         out = self.layer_10(out)
 
-        """
         out = self.layer_11(out)
         out = self.layer_12(out)
         out = self.layer_13(out)
         out = self.layer_14(out)
-        out = self.layer_15(out)
-        out = self.layer_16(out)
-        out = self.layer_17(out)
-        out = self.layer_18(out)
-        """
+
+        # out = self.layer_15(out)
+        # out = self.layer_16(out)
+        #
+        # out = self.layer_17(out)
+        # out = self.layer_18(out)
+        # out = self.layer_19(out)
+        #
+        # out = self.layer_20(out)
+        # out = self.layer_21(out)
+        # out = self.layer_22(out)
+        #
+        # out = self.layer_23(out)
+        # out = self.layer_24(out)
+        # out = self.layer_25(out)
+        # out = self.layer_26(out)
+
+
         # reshaping the matrix into vector of data
         # out = out.view(out.size(0), -1)
 
@@ -197,6 +223,19 @@ class CNNClassifier(nn.Module):
     def __addLayerMaxPool__(self, kernel_size = 2):
         pool_layer = nn.Sequential(
             nn.MaxPool2d(kernel_size = kernel_size, stride = kernel_size),
+        )
+
+        self.img_width = self.img_width/kernel_size
+        self.img_height = self.img_height/kernel_size
+
+        return pool_layer
+
+    """
+    [private] Adds a average pool layer
+    """
+    def __addLayerAveragePool__(self, kernel_size = 2):
+        pool_layer = nn.Sequential(
+            nn.AvgPool2d(kernel_size = kernel_size, stride = kernel_size),
         )
 
         self.img_width = self.img_width/kernel_size
@@ -350,7 +389,7 @@ def train(model,
         print("==> Data loaders created...")
         print(f"==> Number of train/val imgs: {img_train_count}/{img_val_count}")
         print("==> Loss function initialized: CrossEntropyLoss")
-        print("==> Optimizer initialized: {optim} optimizer")
+        print(f"==> Optimizer initialized: {optim} optimizer")
         print("==> Training and evaluation started...\n")
 
     # ---------------- MODEL TRAINING AND EVALUATION ----------------
@@ -431,6 +470,9 @@ def train(model,
             model.exportModel(model_name)
             best_accuracy = val_accuracy
 
+    if verbose:
+        print(f"==> Best accuracy: {best_accuracy:.3f}")
+
     return val_acc_list, tloss_list
 
     # --------------- END  OF TRAINING AND EVALUATION ---------------
@@ -498,12 +540,45 @@ def predict(model = None, img_path = None, transformer = None, classes_path = No
         out = model(img_tensor).cpu()
 
         # get the class with the maximum probability
+        alpha = out.data.numpy().max()
         class_id = out.data.numpy().argmax()
 
         # get class name
-        pred.update({i: classes[class_id]})
+        pred.update({i: (classes[class_id], alpha)})
 
     if verbose:
         print(f"==> DONE.\n")
 
     return pred
+
+"""
+Predicts image class
+    verbose = verbosity to print every step
+"""
+def predictFromFrame(model = None, frame = None, transformer = None, classes = None):
+    assert model, "ERROR: model argument not provided!"
+    assert frame.any(), "ERROR: img frame not provided!"
+    assert transformer, "ERROR: data transformer not provided!"
+    assert classes, "ERROR: an array of class names not provided!"
+
+    # load image
+    img = Image.fromarray(frame)
+
+    # transform data
+    img_tensor = transformer(img).float()
+
+    # PyTorch treats all images as batches. We need to insert an extra batch dimension.
+    img_tensor = img_tensor.unsqueeze(0)
+
+    # send images to GPU if available
+    if torch.cuda.is_available():
+        img_tensor = img_tensor.cuda()
+
+    # predict
+    out = model(img_tensor).cpu()
+
+    # get the class with the maximum probability
+    alpha = out.data.numpy().max()
+    class_id = out.data.numpy().argmax()
+
+    return (classes[class_id], alpha)
