@@ -48,9 +48,9 @@ class YOLOv5Model:
 
 
     """
-    Returns a list of tuples (x1, y1, x2, y2, label)
+    Returns a list of tuples (x1, y1, x2, y2, label, conf)
     """
-    def getBoxData(self, modelOutput, frame, conf = 0.5):
+    def getBoxData(self, modelOutput, frame):
         labels, coord = modelOutput
         x_size, y_size = frame.shape[1], frame.shape[0]
 
@@ -59,12 +59,10 @@ class YOLOv5Model:
         nlabels = len(labels)
         for i in range(nlabels):
             j = coord[i]
-
-            # check confidence
-            if j[4] >= conf:
-                # save data
-                x1, y1, x2, y2 = int(j[0]*x_size), int(j[1]*y_size), int(j[2]*x_size), int(j[3]*y_size)
-                boxData.append((x1, y1, x2, y2, labels[i]))
+            
+            # extract data
+            x1, y1, x2, y2, label, conf = int(j[0]*x_size), int(j[1]*y_size), int(j[2]*x_size), int(j[3]*y_size), self.classToString(labels[i]), j[4]
+            boxData.append((x1, y1, x2, y2, label, conf))
 
         return boxData
 
@@ -100,8 +98,8 @@ class YOLOv5Model:
 
         return frame
 
-    def plotBox(self, coords, frame, colorBGR = None, class_id = None, conf = 0.5, thickness = 3):
-        x1, y1, x2, y2, _ = coords
+    def plotBox(self, coords, frame, colorBGR = None, class_id = None, thickness = 3):
+        x1, y1, x2, y2 = coords
         if not class_id:
             class_id = 'UNKNOWN'
 

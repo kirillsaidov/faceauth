@@ -12,37 +12,19 @@ from email.message import EmailMessage
 device = torch.device(yolov5model.getDevice())
 
 class FaceAuth():
-    def __init__(self, face_model = None, person_model = None, face_model_img_size = (640, 640), person_model_img_size = (64, 64), person_img_mean = [0.5, 0.5, 0.5], person_img_std = [0.5, 0.5, 0.5], person_classes = None, conf = 0.5):
+    def __init__(self, face_model = None, person_model = None, face_model_img_size = (640, 640), person_model_img_size = (64, 64), person_img_mean = [0.5, 0.5, 0.5], person_img_std = [0.5, 0.5, 0.5], conf = 0.5, detect_dist_threshold = 0.42):
         assert face_model, f'ERROR: provide the face model weights: {face_model}'
         assert person_model, f'ERROR: provide the face model weights: {person_model}'
-        assert person_classes, f'ERROR: provide person classes path: {person_classes}'
 
         # save variables
         self.conf = conf
         self.face_model_img_size = face_model_img_size
         self.person_model_img_size = person_model_img_size
+        self.detect_dist_threshold = detect_dist_threshold
 
-        # load face model
+        # load face and person models
         self.face_model = yolov5model.YOLOv5Model(face_model, force_reload = False)
-
-        # create img transformer
-        self.transformer = torchvision.transforms.Compose([
-            torchvision.transforms.Resize(person_model_img_size),
-            torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize(
-                mean = person_img_mean,
-                std = person_img_std
-            )
-        ])
-
-        # read classes from a file
-        self.classes = []
-        with open(person_classes, "r") as f:
-            lines = [line.rstrip() for line in f]
-            self.classes = lines[0].split(";")
-
-        # load person model
-        self.person_model = cnn.loadModel(person_model).to(device)
+        self.person_model = yolov5model.YOLOv5Model(person_model, force_reload = False)
 
     def launch(self):
         cap = cv2.VideoCapture(0)
@@ -57,7 +39,25 @@ class FaceAuth():
 
             # detect and plot a face
             t_start = time.time()
-            modelOutput = self.face_model.detect(frame)
+            modelOutputFaces = self.face_model.detect(frame)
+            crop_face = self.face_model.getBoxData(modelOutputFaces, frame)
+
+            # check if face is close enough to the camera, if true, recognize the face
+            if crop_face:
+                for cf in crop_face:
+                    x1, y1, x2, y2 = cf[0:4]
+                    if (x2 - x1)/self.face_model_img_size[0] > self.detect_dist_threshold or (y2 - y1)/self.face_model_img_size[1] > self.detect_dist_threshold:
+                        # face recognition and draw bounding box
+                        modelOutputPerson = self.person_model.detect(frame)
+                        
+                        # if face was recognized
+                        crop_person = self.person_model.getBoxData(modelOutputPerson, frame)
+                        if crop_person:
+                            crop_person = crop_person[0]
+                            class_id = crop_person[4] if crop_person[5] >= self.conf else None
+                            frame = self.person_model.plotBox(crop_person[0:4], frame, thickness = 2, class_id = class_id)
+
+            """
             crop_data = self.face_model.getBoxData(modelOutput, frame)
             if crop_data:
                 crop_data = crop_data[0]
@@ -76,6 +76,7 @@ class FaceAuth():
 
                 # draw boxes around faces
                 frame = self.face_model.plotBox(crop_data, frame, thickness = 2, class_id = class_id)
+            """
             t_stop = time.time()
 
             # calculate and draw window fps
