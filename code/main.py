@@ -7,7 +7,7 @@ auth = faceauth.FaceAuth(
 	person_model = '../models/auth_model47n.pt',
 	person_img_mean = [0.65625078, 0.48664141, 0.40608295],
 	person_img_std = [0.20471508, 0.17793475, 0.16603905],
-	conf = 0.64,
+	conf = 0.5,
     detect_dist_threshold = 0.45
 )
 auth.launch()

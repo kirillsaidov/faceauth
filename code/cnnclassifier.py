@@ -4,6 +4,9 @@ README: IMPORTANT!
     BEFORE USING THE MODEL MODIFY THE createLayers() AND forward() FUNCTIONS.
     ADD OR REMOVE LAYERS TO YOUR LIKING, OR USE THE DEFAULTS.
     IN THAT CASE THERE IS NOTHING TO CHANGE.
+
+    When using gradient decenst start with a big learning rate and 
+    gradually decrease it!
 """
 
 import sys
