@@ -1,6 +1,6 @@
 <img src="imgs/face-id.png" width="64" height="64" align="left"></img>
 # FaceAuth
-Face Authenticator - a small authentication program that may be tuned for various purposes from face door unlock to a more complex authorization system.
+A small authentication program that may be tuned for various purposes from face door unlock to a more complex authorization system.
 
 ## FaceAuth in action
 ### Face detection and authentication
