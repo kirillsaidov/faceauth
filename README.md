@@ -1,4 +1,4 @@
-<img src="imgs/face-id.png" width="96" height="96" align="left"></img>
+<img src="imgs/face-id.png" width="64" height="64" align="left"></img>
 # FaceAuth
 Face Authenticator - a small authentication program that may be tuned for various purposes from face door unlock to a more complex authorization system.
 
@@ -7,7 +7,7 @@ Face Authenticator - a small authentication program that may be tuned for variou
 <img src="imgs/faceauth_authentication.png" alt="drawing" width="720" height="360"/>
 
 ### Notification or authorization (or any other action)
-<img src="imgs/email.png" alt="drawing" width="360" height="135"/>
+<img src="imgs/email.png" alt="drawing" width="720" height="270"/>
 
 ## How does it work?
 The Face Authenticator system consists of two subsystems:
