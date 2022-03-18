@@ -4,14 +4,10 @@ Face Authenticator - a small authentication program that may be tuned for variou
 
 ## FaceAuth in action
 ### Face detection and authentication
-<p align="center">
-<img src="imgs/faceauth_authentication.png" width="720" height="360" align="left"></img>
-</p>
+<img src="imgs/faceauth_authentication.png" alt="drawing" width="720" height="360"/>
 
 ### Notification or authorization (or any other action)
-<p align="center">
-<img src="imgs/email.png" width="360" height="135" align="left"></img>
-</p>
+<img src="imgs/email.png" alt="drawing" width="360" height="135"/>
 
 ## How does it work?
 The Face Authenticator system consists of two subsystems:
