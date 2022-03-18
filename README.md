@@ -10,7 +10,7 @@ Face Authenticator - a small authentication program that may be tuned for variou
 <img src="imgs/email.png" alt="drawing" width="720" height="270"/>
 
 ## How does it work?
-The Face Authenticator system consists of two subsystems:
+The Face Authenticator system consists of three subsystems:
 1. Face detection
 2. Face authentication
 3. Notification or authorization
